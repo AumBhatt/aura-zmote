@@ -1,0 +1,67 @@
+
+function analyse(signal) {
+    $.ajax('http://irtool.zmote.io/irp/analyse/' + signal)
+        .done(function(data) {
+            var confidence = '<font color="red">ZERO</font>';
+            if (data.confidence > 30)
+                confidence = 'Low';
+            if (data.confidence > 60)
+                confidence = 'Moderate';
+            if (data.confidence > 90)
+                confidence = 'High';
+            $('#results').html('   Confidence: ' + confidence);
+            if (data.spec !== undefined) {
+                var spec = data.spec.protocol + ' ' + data.spec.device + ' ';
+                if (data.spec.subdevice !== undefined)
+                    spec += data.spec.subdevice + ' ';
+                spec += data.spec.obc;
+                $('#results').html($('#results').html() + '\nSpecification: ' + spec);
+                if (data.spec.misc !== undefined)
+                    $('#results').html($('#results').html() + '\n      Remarks: ' + data.spec.misc.replace(/:/, ',').replace(/T=/, 'toggle = '));
+            }
+            if (data.code !== undefined)
+                $('#results').html($('#results').html() + '\n    IR Signal: sendir,1:1,0,' + data.code);
+            if (data.tcode !== undefined)
+                $('#results').html($('#results').html() + '\n       Toggle: sendir,1:1,0,' + data.tcode);
+            if (data.crafted !== undefined)
+                // $('#results').html($('#results').html() + '\n      Crafted: sendir,1:1,0,' + data.crafted);
+                console.log('sendir,1:1,0,' + data.crafted);
+        });
+}
+function getsignal(ip) {
+    $('#results').html('Connecting...');
+    $.ajax('http://' + ip + '/whoareyou', {timeout:3000})
+        .done(function(data) {
+            if (data.type === "ZMT2" || data.type === "ZPRO1" || data.type === "ZPE1") {
+                var uuid = data.uuid;
+                $('#results').html('Waiting for a key from real remote...');
+                $.ajax('http://' + ip + '/v2/' + uuid + '/get_IRL', {timeout:10000})
+                    .done(function(data) {
+                        signal = data.substr(20);
+                        if (signal.match(/^sendir,/))
+                            analyse(signal);
+                        else
+                            $('#results').html('Invalid signal, please try again.');
+                    })
+                    .fail(function(error){
+                        $('#results').html('No keys were received, please try again.');
+                    });
+            }
+            else
+                analyse(ip);
+        })
+        .fail(function(error){
+            $('#results').html('Incorrect IP, please check and try again.');
+        });
+}
+function convert() {
+    $('#results').html('Converting...');
+    var signal = $('#signal').val().trim();
+    if (signal.length > 5) {
+        if (signal.match(/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/))
+            getsignal(signal)
+        else
+            analyse(signal);
+    }
+}
+
