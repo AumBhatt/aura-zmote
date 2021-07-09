@@ -21,7 +21,35 @@
 #include <cstdio>
 #include <bits/stdc++.h>
 
-std::string zmote_sendPocoRequest(std::string ip_addr, Poco::Net::HTTPRequest requestMethod , std::string contentType, std::string requestBody) {
+std::vector<std::string> split_str(std::string str, std::string delimiter) {
+    std::vector<std::string> split;
+    size_t pos = 0;
+    try {
+        while((pos = str.find(delimiter)) != std::string::npos) {
+            split.push_back(str.substr(0, pos));
+            str.erase(0, pos + delimiter.length());
+        }
+        return split;
+    }
+    catch(std::exception &e) {
+        std::cout<<"split_str: Unable to split at delimiter "<<delimiter;
+    }
+    exit(EXIT_FAILURE);
+}
+
+void zmote_responseHandler(std::string responseStr) {
+    std::vector<std::string> response = split_str(responseStr, ",");
+
+    if(response.at(0) != "completeir") {
+        std::cout<<"\nzmote: Request Error\nResponse:\n "<<responseStr<<"\n";
+        exit(EXIT_FAILURE);
+    }
+    else {
+        std::cout<<"\nzmote: Response Complete!\nResponse:\n "<<responseStr<<"\n";
+    }
+}
+
+std::string zmote_sendPocoRequest(std::string ip_addr, std::string contentType, std::string requestBody) {
     try {
         Poco::URI uri(ip_addr);
         Poco::Net::HTTPClientSession session(uri.getHost(), uri.getPort());
@@ -73,7 +101,16 @@ std::string zmote_sendIRCommand(std::string s_mod_frequency, std::string mark_sp
 
 int main(int argc, char *args[]) {
     try {
+        
+    // Test Code :
         std::cout<<zmote_sendIRCommand(args[2], args[3]);
+        zmote_responseHandler("completeir,1:1,<id>");
+        zmote_responseHandler("busyir,1:1,<id>");
+        zmote_responseHandler("error,1:1,low memory");
+        
+
+    // Function Call :
+        //zmote_responseHandler(zmote_sendPocoRequest(args[1], "text/plain", zmote_sendIRCommand(args[2], args[3])));
     }
     catch(std::exception &e) {
         std::cout<<"zmote: too few arguments";
