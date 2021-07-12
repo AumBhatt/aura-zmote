@@ -9,7 +9,7 @@ Program Run:
 ./zmir1 <zmote-ip-addr> <device-uuid> -control <mod-freq> <mark-space-timing>
 ```
 2. Learn Mode
-	Note: Doesn't Store Commands
+<br>	Note: Doesn't Store Commands
 ```
 ./zmir1 <zmote-ip-addr> <device-uuid> -learn
 ```
