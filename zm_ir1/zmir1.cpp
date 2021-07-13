@@ -69,7 +69,7 @@ std::string Zmote::sendPocoRequest(std::string ip_addr, std::string zmote_uuid, 
             path = '/';
         }
 
-        Poco::Net::HTTPRequest req(Poco::Net::HTTPRequest::HTTP_POST, Poco::Net::HTTPMessage::HTTP_1_1);
+        Poco::Net::HTTPRequest req(Poco::Net::HTTPRequest::HTTP_POST, path, Poco::Net::HTTPMessage::HTTP_1_1);
         req.setContentLength(requestBody.length());
         req.setContentType(contentType);
         session.sendRequest(req) << requestBody;
@@ -80,16 +80,15 @@ std::string Zmote::sendPocoRequest(std::string ip_addr, std::string zmote_uuid, 
         std::stringstream str_stream;
         Poco::StreamCopier::copyStream(is, str_stream);
         if(str_stream.str().empty()) {
-            std::cout<<"\nzmote: No Response from zmote\n";
+            std::cout<<"\nzmote: No/Empty Response from zmote\n";
             exit(EXIT_FAILURE);
         }
 
         return str_stream.str();
     }
     catch(std::exception &e) {
-        throw e;
+        std::cout<<"\nzmote: Poco Request Failed\n";
     }
-    std::cout<<"zmote: Poco Request Failed";
     exit(EXIT_FAILURE);
 }
 
@@ -113,8 +112,12 @@ std::string Zmote::learningMode(std::string pocoResponse, std::string zmote_uuid
     std::string delim = "IR Learner Enabled";
 
     try {
-        pocoResponse = pocoResponse.erase(0, pocoResponse.find(delim) + delim.length());
-        return "{Zmote::learned: {'uuid': '" + zmote_uuid + "', 'ir_command': '" + pocoResponse + "'}}";
+        if(pocoResponse == "IR Learner Disabled")
+            std::cout<<"\n"<<pocoResponse<<"\n";
+        else {
+            pocoResponse = pocoResponse.erase(0, pocoResponse.find(delim) + delim.length());
+            return "{Zmote::learned: {'uuid': '" + zmote_uuid + "', 'ir_command': '" + pocoResponse + "'}}";
+        }
     }
     catch(std::exception &e) {
         std::cout<<"\nzmote: learning error";
@@ -135,9 +138,9 @@ int main(int argc, char *args[20]) {
     try {
         if(std::string(args[3]) == "-learn" && argc >= 3) {
             // Learning Mode
-            std::cout<<Zmote::learningMode(Zmote::sendPocoRequest(args[1], args[2], "text/plain", "get_IRL"), args[2]);
+            std::cout<<Zmote::learningMode(Zmote::sendPocoRequest(args[1], args[2], "text/plain", "get_IRL"), args[2])<<std::endl;
         }
-        else if(std::string(args[3]) == "-control" && argc != 5) {
+        else if(std::string(args[3]) == "-control" && argc == 5) {
             // Send IR Command
             Zmote::handleSendIRResponse(Zmote::sendPocoRequest(args[1], args[2], "text/plain", Zmote::createIRCommand(args[4], args[5])));
         }
