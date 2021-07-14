@@ -20,13 +20,15 @@
 #include <string>
 #include <cstdio>
 #include <bits/stdc++.h>
+#include <unistd.h>
 
 namespace Zmote {
     std::vector<std::string> split_str(std::string, std::string);
     void handleSendIRResponse(std::string);
     std::string sendPocoRequest(std::string, std::string, std::string, std::string);
-    std::string createIRCommand(std::string s_mod_frequency, std::string);
+    std::string createIRCommand(std::string, std::string);
     std::string learningMode(std::string, std::string);
+    void exitLearnerMode(std::string, std::string);
 }
 
 std::vector<std::string> Zmote::split_str(std::string str, std::string delimiter) {
@@ -125,6 +127,13 @@ std::string Zmote::learningMode(std::string pocoResponse, std::string zmote_uuid
     exit(EXIT_FAILURE);
 }
 
+void Zmote::exitLearnerMode(std::string ip_addr, std::string zmote_uuid) {
+    std::cout<<"\nPress `return` to exit learner mode\n";
+    std::cin.get();
+    std::cout<<Zmote::learningMode(Zmote::sendPocoRequest(ip_addr, zmote_uuid, "text/plain", "stop_IRL"), zmote_uuid)<<std::endl;
+    exit(0);
+}
+
 int main(int argc, char *args[20]) {
 
     /* args[6] = [
@@ -138,6 +147,8 @@ int main(int argc, char *args[20]) {
     try {
         if(std::string(args[3]) == "-learn" && argc >= 3) {
             // Learning Mode
+            std::thread exitLearnerThread((Zmote::exitLearnerMode), args[1], args[2]);
+            exitLearnerThread.detach();
             std::cout<<Zmote::learningMode(Zmote::sendPocoRequest(args[1], args[2], "text/plain", "get_IRL"), args[2])<<std::endl;
         }
         else if(std::string(args[3]) == "-control" && argc == 5) {
@@ -147,19 +158,6 @@ int main(int argc, char *args[20]) {
         else if(argc < 3){
             std::exception();
         }
-
-/*
-    // Test Code :
-
-        std::cout<<Zmote::createIRCommand(args[3], args[4]);
-        Zmote::handleSendIRResponse("completeir,1:1,<id>");
-        Zmote::handleSendIRResponse("busyir,1:1,<id>");
-        Zmote::handleSendIRResponse("error,1:1,low memory");
-        std::cout<<Zmote::learningMode("IR Learner Enabled\
-sendir,1:1,0,37000,1,1,323,164,20,62,19,63,20,21,20,21,20,21,19,22,20,63,20,3692", "zmote011")<<"\n";
-
- */
-
 /* 
     // Function Calls for :
         // Send IR Command

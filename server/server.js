@@ -23,6 +23,9 @@ app.all('*', (req, res) => {
                 res.end();
             }, 5000);
         }
+        setTimeout(() => {
+            res.end();
+        }, 20000);
     });
 });
 
