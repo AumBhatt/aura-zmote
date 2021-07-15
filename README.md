@@ -1,7 +1,7 @@
 ## <p align="center">zmote</p>
 Compile:
 ```
-g++ -o zmir1 zmir1.cpp -lPocoNet -lPocoUtil -lPocoFoundation
+g++ -o zmir1 zmir1.cpp -lPocoNet -lPocoUtil -lPocoFoundation -lpthread
 ```
 Program Run:
 1. Send Command
