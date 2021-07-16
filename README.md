@@ -1,4 +1,5 @@
-## <p align="center">zmote</p>
+# <p align="center">Global Cache / zmote</p>
+## 1. IP > IR
 Compile:
 ```
 g++ -o zmir1 zmir1.cpp -lPocoNet -lPocoUtil -lPocoFoundation -lpthread
@@ -13,4 +14,21 @@ Program Run:
 ```
 ./zmir1 <zmote-ip-addr> <device-uuid> -learn
 ```
+
+## 2. IP > SERIAL
+
+Compile:
+```
+g++ -o zmir1 zmir1.cpp -lPocoNet -lPocoUtil -lPocoFoundation
+```
+Program Run:
+1. get_SERIAL
+```
+./zmir1 <zmote-ip-addr> get_SERIAL
+```
+2. set_SERIAL
+```
+./zmir1 <zmote-ip-addr> set_SERIAL <baudrate> <flowcontrol> <parity>
+```
+
 Todo : https://github.com/AumBhatt/aura-zmote/issues/1#issue-941011234
