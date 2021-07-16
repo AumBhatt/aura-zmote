@@ -24,11 +24,11 @@ g++ -o gcs1 gc_s1.cpp -lPocoNet -lPocoUtil -lPocoFoundation
 Program Run:
 1. get_SERIAL
 ```
-./zmir1 <zmote-ip-addr> get_SERIAL
+./gcs1 <zmote-ip-addr> get_SERIAL
 ```
 2. set_SERIAL
 ```
-./zmir1 <zmote-ip-addr> set_SERIAL <baudrate> <flowcontrol> <parity>
+./gcs1 <zmote-ip-addr> set_SERIAL <baudrate> <flowcontrol> <parity>
 ```
 
 Todo : https://github.com/AumBhatt/aura-zmote/issues/1#issue-941011234
