@@ -26,7 +26,7 @@ namespace Zmote_serial {
     std::vector<std::string> split_str(std::string, std::string);
     void handleSerialResponse(std::string);
     std::string sendPocoRequest(std::string, std::string, std::string, std::string);
-    std::string createRequestBody(std::string, std::string);
+    std::string createRequestBody(std::string, unsigned int, std::string, std::string);
 }
 
 std::vector<std::string> Zmote_serial::split_str(std::string str, std::string delimiter) {
@@ -46,14 +46,13 @@ std::vector<std::string> Zmote_serial::split_str(std::string str, std::string de
 }
 
 void Zmote_serial::handleSerialResponse(std::string responseStr) {
-    std::vector<std::string> response = Zmote_serial::split_str(responseStr, ",");
-
-    if(response.at(0) != "completeir") {
-        std::cout<<"\nzmote: Request Error\nResponse:\n "<<responseStr<<"\n";
+    if(responseStr.find("SERIAL") == std::string::npos) {
+        std::cout<<"\nzmote_serial: SERIAL response error/not found"<<"\n  "<<responseStr<<std::endl;
         exit(EXIT_FAILURE);
     }
     else {
-        std::cout<<"\nzmote: Response Complete!\nResponse:\n "<<responseStr<<"\n";
+        std::cout<<"\nzmote_serial: Request Successful\n "<<responseStr<<std::endl;
+        exit(EXIT_SUCCESS);
     }
 }
 
@@ -143,7 +142,7 @@ int main(int argc, char *args[20]) {
         5: mark_space_timing
     ] */
     try {
-        if(std::string(args[3]) == "-learn" && argc >= 3) {
+        /* if(std::string(args[3]) == "-learn" && argc >= 3) {
             // Learning Mode
             //Zmote_serial::learningMode(args[1], args[2]);
         }
@@ -153,7 +152,8 @@ int main(int argc, char *args[20]) {
         }
         else if(argc < 3){
             std::exception();
-        }
+        } */
+        Zmote_serial::handleSerialResponse("SERIAL,1:1,<baudrate>,<flowcontrol>,<parity>");
 /* 
     // Function Calls for :
         // Send IR Command
