@@ -19,7 +19,7 @@ Program Run:
 
 Compile:
 ```
-g++ -o zmir1 zmir1.cpp -lPocoNet -lPocoUtil -lPocoFoundation
+g++ -o gcs1 gc_s1.cpp -lPocoNet -lPocoUtil -lPocoFoundation
 ```
 Program Run:
 1. get_SERIAL
