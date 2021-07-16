@@ -145,10 +145,11 @@ int main(int argc, char *args[20]) {
         5: parity
     ] */
     try {
-        if(args[2] == "set_SERIAL")
-            Zmote_serial::handleSerialResponse(Zmote_serial::sendPocoRequest(args[1], "text/plain", Zmote_serial::createRequestBody("set_SERIAL", 115200, "FLOW_NONE", "PARITY_NO")));
-        else if(args[2] == "get_SERIAL")
-            Zmote_serial::handleSerialResponse(Zmote_serial::sendPocoRequest(args[1], "text/plain", Zmote_serial::createRequestBody("get_SERIAL")));
+        if(std::string(args[2]) == "set_SERIAL") {
+            Zmote_serial::handleSerialResponse(Zmote_serial::sendPocoRequest(args[1], "text/plain", Zmote_serial::createRequestBody(args[2], std::stoi(args[3]), args[4], args[5])));
+        }
+        else if(std::string(args[2]) == "get_SERIAL")
+            Zmote_serial::handleSerialResponse(Zmote_serial::sendPocoRequest(args[1], "text/plain", Zmote_serial::createRequestBody(args[2])));
         else std::exception();
 /* 
     // Function Calls for :
