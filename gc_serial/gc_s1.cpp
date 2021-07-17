@@ -80,8 +80,8 @@ std::string Zmote_serial::sendPocoRequest(std::string ip_addr, std::string conte
         if(str_stream.str().empty()) {
             std::cout<<"\nzmote_serial: No/Empty Response from zmote";
         }
-
-        return str_stream.str();
+        else
+            return str_stream.str();
     }
     catch(std::exception &e) {
         std::cout<<"\nzmote_serial: Poco Request Failed\n";
@@ -91,6 +91,7 @@ std::string Zmote_serial::sendPocoRequest(std::string ip_addr, std::string conte
 
 std::string Zmote_serial::createRequestBody(std::string command, unsigned int baudrate = 0, std::string flowcontrol = "", std::string parity = "") {
     try {
+        bool error = false;
         if(command == "set_SERIAL"){
             switch(baudrate) {
                 case 115200:
@@ -105,20 +106,20 @@ std::string Zmote_serial::createRequestBody(std::string command, unsigned int ba
                     break;
                 default:
                     std::cout<<"\nzmote_serial: Incorrect baudrate "<<baudrate;
-                    return "";
+                    error = true;
                     
             };
             if(flowcontrol != "FLOW_HARDWARE" && flowcontrol != "FLOW_NONE") {
                 std::cout<<"\nzmote_serial: Incorrect flowcontrol";
-                return "";
+                error = true;
                 
             }
             if(parity != "PARITY_NO" && parity != "PARITY_EVEN" && parity != "PARITY_ODD") {
                 std::cout<<"\nzmote_serial: Incorrect Parity Type";
-                return "";
-                
+                error = true;
             }
-            return command + ",1:1," + std::to_string(baudrate) + "," + flowcontrol + "," + parity;
+            if(!error)
+                return command + ",1:1," + std::to_string(baudrate) + "," + flowcontrol + "," + parity;
         }
         else if(command == "get_SERIAL"){
             return command + ",1:1";
@@ -126,7 +127,6 @@ std::string Zmote_serial::createRequestBody(std::string command, unsigned int ba
         else {
             std::cout<<"\nzmote_serial: Unknown Command `"<<command<<"`";
         }
-
     }
     catch(std::exception &e) {
         throw e;
@@ -151,7 +151,14 @@ int main(int argc, char *args[20]) {
         }
         else if(std::string(args[2]) == "get_SERIAL")
             Zmote_serial::handleSerialResponse(Zmote_serial::sendPocoRequest(args[1], "text/plain", Zmote_serial::createRequestBody(args[2])));
-        else std::exception();
+        else {
+            std::cout<<"zmote_serial: too few arguments";
+            std::cout<<"\nUsage:\n "<<args[0]<<" <ip-address> <options> [-params]";
+            std::cout<<"\n <options>: \n  get_SERIAL\n";
+            std::cout<<"\n  set_SERIAL \n\t [-params]:  <baudrate> <flowcontrol> <parity>\n";
+            std::cout<<"\n  help = Usage Help";
+            std::cout<<std::endl;
+        }
 /* 
     // Function Calls for :
         // get_SERIAL
@@ -162,12 +169,7 @@ int main(int argc, char *args[20]) {
  */
     }
     catch(std::exception &e) {
-        std::cout<<"zmote_serial: too few arguments";
-        std::cout<<"\nUsage:\n "<<args[0]<<" <ip-address> <options> [-params]";
-        std::cout<<"\n <options>: \n  get_SERIAL\n";
-        std::cout<<"\n  set_SERIAL \n\t [-params]:  <baudrate> <flowcontrol> <parity>\n";
-        std::cout<<"\n  help = Usage Help";
-        std::cout<<std::endl;
+
     }
     return 0;
     
