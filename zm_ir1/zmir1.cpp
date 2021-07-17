@@ -44,8 +44,8 @@ std::vector<std::string> Zmote_IR::split_str(std::string str, std::string delimi
     }
     catch(std::exception &e) {
         std::cout<<"split_str: Unable to split at delimiter "<<delimiter;
+        throw e;
     }
-    exit(EXIT_FAILURE);
 }
 
 void Zmote_IR::handleSendIRResponse(std::string responseStr) {
@@ -53,7 +53,6 @@ void Zmote_IR::handleSendIRResponse(std::string responseStr) {
 
     if(response.at(0) != "completeir") {
         std::cout<<"\nzmote: Request Error\nResponse:\n "<<responseStr<<"\n";
-        exit(EXIT_FAILURE);
     }
     else {
         std::cout<<"\nzmote: Response Complete!\nResponse:\n "<<responseStr<<"\n";
@@ -61,6 +60,7 @@ void Zmote_IR::handleSendIRResponse(std::string responseStr) {
 }
 
 std::string Zmote_IR::sendPocoRequest(std::string ip_addr, std::string zmote_uuid, std::string contentType, std::string requestBody) {
+    if(!requestBody.empty())
     try {
         ip_addr = "http://" + ip_addr + "/v2/" + zmote_uuid;
 
@@ -84,15 +84,16 @@ std::string Zmote_IR::sendPocoRequest(std::string ip_addr, std::string zmote_uui
         Poco::StreamCopier::copyStream(is, str_stream);
         if(str_stream.str().empty()) {
             std::cout<<"\nzmote: No/Empty Response from zmote\n";
-            exit(EXIT_FAILURE);
+            return "";
         }
 
         return str_stream.str();
     }
     catch(std::exception &e) {
         std::cout<<"\nzmote: Poco Request Failed\n";
+        throw e;
     }
-    exit(EXIT_FAILURE);
+    return "";
 }
 
 std::string Zmote_IR::createIRCommand(std::string s_mod_frequency, std::string mark_space_timing) {
@@ -102,10 +103,11 @@ std::string Zmote_IR::createIRCommand(std::string s_mod_frequency, std::string m
         // std::cout<<mark_space_timing;
         if(!(i_mod_freq >= 36000 && i_mod_freq <= 60000)) {
             std::cout<<"\nzmote: modulation frequency "<<i_mod_freq<<" is out of range [36kHz, 60kHz]\n";
-            exit(EXIT_FAILURE);
-    }
+            return "";
+        }
     }
     catch(std::exception &e) {
+        return "";
         throw e;
     }
     return "sendir,1:1,0," + s_mod_frequency + ",1,1," + mark_space_timing;
@@ -125,14 +127,14 @@ std::string Zmote_IR::learningModeResponseHandler(std::string pocoResponse, std:
     catch(std::exception &e) {
         std::cout<<"\nzmote: learning error";
     }
-    exit(EXIT_FAILURE);
+    return "";
 }
 
 void Zmote_IR::exitLearnerMode(std::string ip_addr, std::string zmote_uuid) {
     std::cout<<"\nPress `return` to exit learner mode\n";
     std::cin.get();
     std::cout<<Zmote_IR::learningModeResponseHandler(Zmote_IR::sendPocoRequest(ip_addr, zmote_uuid, "text/plain", "stop_IRL"), zmote_uuid)<<std::endl;
-    exit(0);
+    return;
 }
 
 void Zmote_IR::learningMode(std::string ip_addr, std::string zmote_uuid) {
@@ -147,7 +149,7 @@ int main(int argc, char *args[20]) {
         0: run exec
         1: ip_addr, 
         2: zmote_uuid, 
-        3: option, 
+        3: option, (learn/control mode)
         4: s_mod_frequency, 
         5: mark_space_timing
     ] */
@@ -156,12 +158,17 @@ int main(int argc, char *args[20]) {
             // Learning Mode
             Zmote_IR::learningMode(args[1], args[2]);
         }
-        else if(std::string(args[3]) == "-control" && argc == 5) {
+        else if(std::string(args[3]) == "-control") {
             // Send IR Command
             Zmote_IR::handleSendIRResponse(Zmote_IR::sendPocoRequest(args[1], args[2], "text/plain", Zmote_IR::createIRCommand(args[4], args[5])));
         }
-        else if(argc < 3){
-            std::exception();
+        else{
+            std::cout<<"zmote: too few arguments";
+            std::cout<<"\nUsage:\n "<<args[0]<<" <ip-address> <uuid> [-options] [-params]";
+            std::cout<<"\n [options]: \n  [-learn] = zmote learn mode\n";
+            std::cout<<"\n  [-control] = send ir command \n\t [-params]:  <modulation_frequency> <mark_space_timing>\n";
+            std::cout<<"\n  [-help] = Usage Help";
+            std::cout<<std::endl;
         }
 /* 
     // Function Calls for :
@@ -173,12 +180,6 @@ int main(int argc, char *args[20]) {
  */
     }
     catch(std::exception &e) {
-        std::cout<<"zmote: too few arguments";
-        std::cout<<"\nUsage:\n "<<args[0]<<" <ip-address> <uuid> [-options] [-params]";
-        std::cout<<"\n [options]: \n  [-learn] = zmote learn mode\n";
-        std::cout<<"\n  [-control] = send ir command \n\t [-params]:  <modulation_frequency> <mark_space_timing>\n";
-        std::cout<<"\n  [-help] = Usage Help";
-        std::cout<<std::endl;
     }
     return 0;
     

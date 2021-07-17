@@ -13,12 +13,18 @@ app.all('*', (req, res) => {
     });
     req.on('end', function() {
         console.log("Request Body     : " + requestBody);
-        res.write(handleZmoteRequest(requestBody));
-        if(requestBody === 'stop_IRL') {
+
+        if(requestBody.includes("sendir")){
+            console.log(true);
+            res.end("completeir,1:1,0").end();
+        }
+        else if(requestBody === 'stop_IRL') {
+            res.write(handleZmoteRequest(requestBody));
             res.end();
         }
         else {
             setTimeout(() => {
+                res.write(handleZmoteRequest(requestBody));
                 res.write("\sample-ir-command");
                 res.end();
             }, 5000);
@@ -26,6 +32,7 @@ app.all('*', (req, res) => {
         setTimeout(() => {
             res.end();
         }, 20000);
+        console.log("Sending Response");
     });
 });
 
