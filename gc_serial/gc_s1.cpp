@@ -42,18 +42,17 @@ std::vector<std::string> Zmote_serial::split_str(std::string str, std::string de
     catch(std::exception &e) {
         std::cout<<"split_str: Unable to split at delimiter "<<delimiter;
     }
-    exit(EXIT_FAILURE);
+    
 }
 
 void Zmote_serial::handleSerialResponse(std::string responseStr) {
     if(responseStr.find("SERIAL") == std::string::npos) {
-        std::cout<<"\nzmote_serial: SERIAL response error/not found"<<"\n  "<<responseStr<<std::endl;
-        exit(EXIT_FAILURE);
+        std::cout<<"\nzmote_serial: SERIAL response error/not found"<<"\n";
     }
     else {
         std::cout<<"\nzmote_serial: Request Successful\n "<<responseStr<<std::endl;
-        exit(EXIT_SUCCESS);
     }
+    return;
 }
 
 std::string Zmote_serial::sendPocoRequest(std::string ip_addr, std::string contentType, std::string requestBody) {
@@ -79,8 +78,7 @@ std::string Zmote_serial::sendPocoRequest(std::string ip_addr, std::string conte
         std::stringstream str_stream;
         Poco::StreamCopier::copyStream(is, str_stream);
         if(str_stream.str().empty()) {
-            std::cout<<"\nzmote_serial: No/Empty Response from zmote\n";
-            exit(EXIT_FAILURE);
+            std::cout<<"\nzmote_serial: No/Empty Response from zmote";
         }
 
         return str_stream.str();
@@ -88,7 +86,7 @@ std::string Zmote_serial::sendPocoRequest(std::string ip_addr, std::string conte
     catch(std::exception &e) {
         std::cout<<"\nzmote_serial: Poco Request Failed\n";
     }
-    exit(EXIT_FAILURE);
+    return "";
 }
 
 std::string Zmote_serial::createRequestBody(std::string command, unsigned int baudrate = 0, std::string flowcontrol = "", std::string parity = "") {
@@ -106,16 +104,19 @@ std::string Zmote_serial::createRequestBody(std::string command, unsigned int ba
                 case 1200:
                     break;
                 default:
-                    std::cout<<"\nzmote_serial: Incorrect baudrate "<<baudrate<<"\n";
-                    exit(EXIT_FAILURE);
+                    std::cout<<"\nzmote_serial: Incorrect baudrate "<<baudrate;
+                    return "";
+                    
             };
             if(flowcontrol != "FLOW_HARDWARE" && flowcontrol != "FLOW_NONE") {
-                std::cout<<"\nzmote_serial: Incorrect flowcontrol\n";
-                exit(EXIT_FAILURE);
+                std::cout<<"\nzmote_serial: Incorrect flowcontrol";
+                return "";
+                
             }
             if(parity != "PARITY_NO" && parity != "PARITY_EVEN" && parity != "PARITY_ODD") {
-                std::cout<<"\nzmote_serial: Incorrect Parity Type\n";
-                exit(EXIT_FAILURE);
+                std::cout<<"\nzmote_serial: Incorrect Parity Type";
+                return "";
+                
             }
             return command + ",1:1," + std::to_string(baudrate) + "," + flowcontrol + "," + parity;
         }
@@ -123,14 +124,14 @@ std::string Zmote_serial::createRequestBody(std::string command, unsigned int ba
             return command + ",1:1";
         }
         else {
-            std::cout<<"\nzmote_serial: Unknown Command `"<<command<<"`\n";
+            std::cout<<"\nzmote_serial: Unknown Command `"<<command<<"`";
         }
 
     }
     catch(std::exception &e) {
         throw e;
     }
-    exit(EXIT_FAILURE);
+    return "";
 }
 
 
