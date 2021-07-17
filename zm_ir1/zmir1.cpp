@@ -29,7 +29,7 @@ namespace Zmote_IR {
     std::string createIRCommand(std::string, std::string);
     std::string learningModeResponseHandler(std::string, std::string);
     void learningMode(std::string, std::string);
-    void exitLearnerMode(std::string, std::string);
+    void startLearnerMode(std::string, std::string);
 }
 
 std::vector<std::string> Zmote_IR::split_str(std::string str, std::string delimiter) {
@@ -56,11 +56,11 @@ void Zmote_IR::handleSendIRResponse(std::string responseStr) {
     }
     else {
         std::cout<<"\nzmote: Response Complete!\nResponse:\n "<<responseStr<<"\n";
+        return;
     }
 }
 
 std::string Zmote_IR::sendPocoRequest(std::string ip_addr, std::string zmote_uuid, std::string contentType, std::string requestBody) {
-    if(!requestBody.empty())
     try {
         ip_addr = "http://" + ip_addr + "/v2/" + zmote_uuid;
 
@@ -82,12 +82,10 @@ std::string Zmote_IR::sendPocoRequest(std::string ip_addr, std::string zmote_uui
 
         std::stringstream str_stream;
         Poco::StreamCopier::copyStream(is, str_stream);
-        if(str_stream.str().empty()) {
+        if(str_stream.str().empty())
             std::cout<<"\nzmote: No/Empty Response from zmote\n";
-            return "";
-        }
-
-        return str_stream.str();
+        else
+            return str_stream.str();
     }
     catch(std::exception &e) {
         std::cout<<"\nzmote: Poco Request Failed\n";
@@ -103,14 +101,14 @@ std::string Zmote_IR::createIRCommand(std::string s_mod_frequency, std::string m
         // std::cout<<mark_space_timing;
         if(!(i_mod_freq >= 36000 && i_mod_freq <= 60000)) {
             std::cout<<"\nzmote: modulation frequency "<<i_mod_freq<<" is out of range [36kHz, 60kHz]\n";
-            return "";
         }
+        else
+            return "sendir,1:1,0," + s_mod_frequency + ",1,1," + mark_space_timing;
     }
     catch(std::exception &e) {
-        return "";
         throw e;
     }
-    return "sendir,1:1,0," + s_mod_frequency + ",1,1," + mark_space_timing;
+    return "";
 }
 
 std::string Zmote_IR::learningModeResponseHandler(std::string pocoResponse, std::string zmote_uuid) {
@@ -130,17 +128,18 @@ std::string Zmote_IR::learningModeResponseHandler(std::string pocoResponse, std:
     return "";
 }
 
-void Zmote_IR::exitLearnerMode(std::string ip_addr, std::string zmote_uuid) {
-    std::cout<<"\nPress `return` to exit learner mode\n";
-    std::cin.get();
-    std::cout<<Zmote_IR::learningModeResponseHandler(Zmote_IR::sendPocoRequest(ip_addr, zmote_uuid, "text/plain", "stop_IRL"), zmote_uuid)<<std::endl;
+void Zmote_IR::startLearnerMode(std::string ip_addr, std::string zmote_uuid) {
+    std::cout<<Zmote_IR::learningModeResponseHandler(Zmote_IR::sendPocoRequest(ip_addr, zmote_uuid, "text/plain", "get_IRL"), zmote_uuid)<<std::endl;
     return;
 }
 
 void Zmote_IR::learningMode(std::string ip_addr, std::string zmote_uuid) {
-    std::thread exitLearnerThread((Zmote_IR::exitLearnerMode), ip_addr, zmote_uuid);
-    exitLearnerThread.detach();
-    std::cout<<Zmote_IR::learningModeResponseHandler(Zmote_IR::sendPocoRequest(ip_addr, zmote_uuid, "text/plain", "get_IRL"), zmote_uuid)<<std::endl;
+    std::thread startLearning((Zmote_IR::startLearnerMode), ip_addr, zmote_uuid);
+    startLearning.detach();
+    std::cout<<"\nPress `return` to exit learner mode\n";
+    std::cin.get();
+    std::cout<<Zmote_IR::learningModeResponseHandler(Zmote_IR::sendPocoRequest(ip_addr, zmote_uuid, "text/plain", "stop_IRL"), zmote_uuid)<<std::endl;
+    return;
 }
 
 int main(int argc, char *args[20]) {

@@ -15,37 +15,31 @@ app.all('*', (req, res) => {
         console.log("Request Body     : " + requestBody);
 
         if(requestBody.includes("sendir")){
-            console.log(true);
             res.end("completeir,1:1,0").end();
         }
         else if(requestBody === 'stop_IRL') {
-            res.write(handleZmoteRequest(requestBody));
+            res.write(`IR Learner Disabled`);
             res.end();
         }
-        else {
+        else if(requestBody === 'get_IRL'){
+            res.write(`IR Learner Enabled`);
             setTimeout(() => {
                 res.write(handleZmoteRequest(requestBody));
                 res.write("\sample-ir-command");
                 res.end();
             }, 5000);
         }
+        else {
+            res.end();
+        }
+
+        // Emulate no button pressed
         setTimeout(() => {
             res.end();
         }, 20000);
         console.log("Sending Response");
     });
 });
-
-function handleZmoteRequest(requestBody) {
-    switch(true) {
-        case (requestBody === 'get_IRL'):
-            return `IR Learner Enabled`;
-        case (requestBody === 'stop_IRL'):
-            return `IR Learner Disabled`;
-        default:
-            return "unknown";
-    }
-}
 
 app.listen(port, () => {
     console.clear();
