@@ -21,38 +21,29 @@
 #include <cstdio>
 #include <bits/stdc++.h>
 #include <unistd.h>
+#include <stdexcept>
 
 namespace Zmote_serial {
-    std::vector<std::string> split_str(std::string, std::string);
-    void handleSerialResponse(std::string);
+    int handleSerialResponse(std::string);
     std::string sendPocoRequest(std::string, std::string, std::string);
     std::string createRequestBody(std::string, unsigned int, std::string, std::string);
 }
 
-std::vector<std::string> Zmote_serial::split_str(std::string str, std::string delimiter) {
-    std::vector<std::string> split;
-    size_t pos = 0;
-    try {
-        while((pos = str.find(delimiter)) != std::string::npos) {
-            split.push_back(str.substr(0, pos));
-            str.erase(0, pos + delimiter.length());
-        }
-        return split;
-    }
-    catch(std::exception &e) {
-        std::cout<<"split_str: Unable to split at delimiter "<<delimiter;
-    }
-    
-}
 
-void Zmote_serial::handleSerialResponse(std::string responseStr) {
-    if(responseStr.find("SERIAL") == std::string::npos) {
-        std::cout<<"\nzmote_serial: SERIAL response error/not found"<<"\n";
+int Zmote_serial::handleSerialResponse(std::string responseStr) {
+    try {
+        if(responseStr.find("SERIAL") == std::string::npos) {
+            throw "SERIAL response error/not found";
+        }
+        else {
+            std::cout<<"\nRequest Successful\n "<<responseStr<<std::endl;
+            return 0;
+        }
     }
-    else {
-        std::cout<<"\nzmote_serial: Request Successful\n "<<responseStr<<std::endl;
+    catch(const char *ex) {
+        std::cout << std::endl << "Zmote_serial::handleSerialResponse(): " << std::endl << ex <<std::endl;
+        return -1;
     }
-    return;
 }
 
 std::string Zmote_serial::sendPocoRequest(std::string ip_addr, std::string contentType, std::string requestBody) {
@@ -78,20 +69,19 @@ std::string Zmote_serial::sendPocoRequest(std::string ip_addr, std::string conte
         std::stringstream str_stream;
         Poco::StreamCopier::copyStream(is, str_stream);
         if(str_stream.str().empty()) {
-            std::cout<<"\nzmote_serial: No/Empty Response from zmote";
+            std::cout<<"\nNo/Empty Response from zmote";
         }
         else
             return str_stream.str();
     }
     catch(std::exception &e) {
-        std::cout<<"\nzmote_serial: Poco Request Failed\n";
+        std::cout << std::endl << e.what() << std::endl;
+        return "";
     }
-    return "";
 }
 
 std::string Zmote_serial::createRequestBody(std::string command, unsigned int baudrate = 0, std::string flowcontrol = "", std::string parity = "") {
     try {
-        bool error = false;
         if(command == "set_SERIAL"){
             switch(baudrate) {
                 case 115200:
@@ -105,33 +95,29 @@ std::string Zmote_serial::createRequestBody(std::string command, unsigned int ba
                 case 1200:
                     break;
                 default:
-                    std::cout<<"\nzmote_serial: Incorrect baudrate "<<baudrate;
-                    error = true;
+                    throw "Incorrect baudrate " + baudrate;
                     
             };
             if(flowcontrol != "FLOW_HARDWARE" && flowcontrol != "FLOW_NONE") {
-                std::cout<<"\nzmote_serial: Incorrect flowcontrol";
-                error = true;
+                throw "Incorrect flowcontrol";
                 
             }
             if(parity != "PARITY_NO" && parity != "PARITY_EVEN" && parity != "PARITY_ODD") {
-                std::cout<<"\nzmote_serial: Incorrect Parity Type";
-                error = true;
+                throw "Incorrect Parity Type";
             }
-            if(!error)
-                return command + ",1:1," + std::to_string(baudrate) + "," + flowcontrol + "," + parity;
+            return command + ",1:1," + std::to_string(baudrate) + "," + flowcontrol + "," + parity;
         }
         else if(command == "get_SERIAL"){
             return command + ",1:1";
         }
         else {
-            std::cout<<"\nzmote_serial: Unknown Command `"<<command<<"`";
+            throw "Unknown Command";
         }
     }
-    catch(std::exception &e) {
-        throw e;
+    catch (const char *ex) {
+        std::cout << std::endl << "Zmote_serial::createRequestBody(): " << ex << std::endl;
+        return "";
     }
-    return "";
 }
 
 
@@ -145,14 +131,24 @@ int main(int argc, char *args[20]) {
         4: flowcontrol, 
         5: parity
     ] */
+    std::string requestBody, pocoResponse;
     try {
         if(std::string(args[2]) == "set_SERIAL") {
-            Zmote_serial::handleSerialResponse(Zmote_serial::sendPocoRequest(args[1], "text/plain", Zmote_serial::createRequestBody(args[2], std::stoi(args[3]), args[4], args[5])));
+            if( !(requestBody = Zmote_serial::createRequestBody(args[2], std::stoi(args[3]), args[4], args[5])).empty() ) {
+                if( !(pocoResponse = Zmote_serial::sendPocoRequest(args[1], "text/plain", requestBody)).empty() ) {
+                    Zmote_serial::handleSerialResponse(pocoResponse);
+                }
+            }
         }
-        else if(std::string(args[2]) == "get_SERIAL")
-            Zmote_serial::handleSerialResponse(Zmote_serial::sendPocoRequest(args[1], "text/plain", Zmote_serial::createRequestBody(args[2])));
+        else if(std::string(args[2]) == "get_SERIAL") {
+            if( !(requestBody = Zmote_serial::createRequestBody(args[2])).empty() ) {
+                if( !(pocoResponse = Zmote_serial::sendPocoRequest(args[1], "text/plain", requestBody)).empty() ) {
+                    Zmote_serial::handleSerialResponse(pocoResponse);
+                }
+            }
+        }
         else {
-            std::cout<<"zmote_serial: too few arguments";
+            std::cout<<"too few arguments";
             std::cout<<"\nUsage:\n "<<args[0]<<" <ip-address> <options> [-params]";
             std::cout<<"\n <options>: \n  get_SERIAL\n";
             std::cout<<"\n  set_SERIAL \n\t [-params]:  <baudrate> <flowcontrol> <parity>\n";
