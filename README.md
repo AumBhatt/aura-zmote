@@ -1,4 +1,4 @@
-# <p align="center">Global Cache / zmote</p>
+# <p align="center"><img src="zmote-logo3.png"></p>
 ## 1. IP > IR
 Compile:
 ```
