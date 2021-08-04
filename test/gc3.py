@@ -3,7 +3,7 @@ from time import sleep
 import sys
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 HOST = '127.0.0.1'
-PORT = 4998
+PORT = 3000
 sock.connect((HOST, PORT))
 #sock.bind(('', PORT))
 sock.settimeout(5)
@@ -18,6 +18,7 @@ while(1):
 
 sock.close()
 del sock
+exit()
 
 """
 sendir,1:1,0,37000,1,1,166,167,20,63,20,64,19,64,19,23,19,22,20,23,19,23,19,23,19,64,19,64,19,64,19,23,19,23,19,23,19,23,19,23,19,22,20,64,19,23,19,23,19,
