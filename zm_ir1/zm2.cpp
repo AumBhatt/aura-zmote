@@ -33,7 +33,7 @@ namespace Zmote_IR {
     std::string sendPocoRequest(std::string, std::string, std::string, std::string);
     std::string createIRCommand(std::string, std::string);
     std::string learningModeResponseHandler(std::string, std::string);
-    void learningMode(std::string, std::string);
+    void learningMode(std::string, std::string, int);
     int startLearnerMode(std::string, std::string);
 }
 
@@ -147,15 +147,14 @@ int Zmote_IR::startLearnerMode(std::string ip_addr, std::string zmote_uuid) {
     return -1; // error / empty response
 }
 
-void Zmote_IR::learningMode(std::string ip_addr, std::string zmote_uuid) {
+void Zmote_IR::learningMode(std::string ip_addr, std::string zmote_uuid, int sleepTimer) {
 
     // Create learning mode thread
     std::thread startLearning((Zmote_IR::startLearnerMode), ip_addr, zmote_uuid);
     startLearning.detach(); // Detach learning mode thread
-    std::cout << std::this_thread::get_id();
     // Listen to key press on 'main' thread
-    std::cout<<"\nPress `return` to exit learner mode\n";
-    std::cin.get();
+    std::cout<<"\nWaiting for response for " << sleepTimer << "s\n";
+    sleep(sleepTimer);
     // Join learning mode thread to main thread if key pressed
     // startLearning.join();
     if((learnedValue).empty()) {
@@ -177,9 +176,10 @@ int main(int argc, char **args) {
         5: mark_space_timing
     ] */
     try {
-        if(std::string(args[3]) == "-learn" && argc >= 3) {
+        if(std::string(args[3]) == "-learn" /* && argc == 5 */) {
             // Learning Mode
-            Zmote_IR::learningMode(args[1], args[2]);
+            // Zmote_IR::learningMode(args[1], args[2], std::stoi(args[4]));
+            std::cout << "\n" << Zmote_IR::sendPocoRequest(args[1], args[2], "text/plain", "get_IRL"), args[2]) << "std::endl";
         }
         else if(std::string(args[3]) == "-control") {
             // Send IR Command
@@ -188,7 +188,7 @@ int main(int argc, char **args) {
         else{
             std::cout<<"zmote: too few arguments";
             std::cout<<"\nUsage:\n "<<args[0]<<" <ip-address> <uuid> [-options] [-params]";
-            std::cout<<"\n [options]: \n  [-learn] = zmote learn mode\n";
+            std::cout<<"\n [options]: \n  [-learn] = zmote learn mode \n\t [-params]: timer(seconds)\n";
             std::cout<<"\n  [-control] = send ir command \n\t [-params]:  <modulation_frequency> <mark_space_timing>\n";
             std::cout<<"\n  [-help] = Usage Help";
             std::cout<<std::endl;
