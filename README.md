@@ -4,6 +4,11 @@ Compile: test/i1.cpp
 ```bash
 g++ -g -o i1 i1.cpp -lpthread
 ```
+`or` use makefile: test/makefile
+```bash
+cd test
+make
+```
 Program Run:
 1. Learn Mode
 <br>	Note: Doesn't Store Commands
