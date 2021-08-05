@@ -1,34 +1,21 @@
 # <p align="center"><img src="zmote-logo3.png"></p>
 ## 1. IP > IR
-Compile:
+Compile: test/i1.cpp
 ```bash
-g++ -o zmir1 zmir1.cpp -lPocoNet -lPocoUtil -lPocoFoundation -lpthread
+g++ -g -o i1 i1.cpp -lpthread
 ```
 Program Run:
-1. Send Command
-```bash
-./zmir1 <zmote-ip-addr> <device-uuid> -control <mod-freq> <mark-space-timing>
-```
-2. Learn Mode
+1. Learn Mode
 <br>	Note: Doesn't Store Commands
 ```bash
-./zmir1 <zmote-ip-addr> <device-uuid> -learn
+./i1 <gc-ip-addr>
 ```
 
-## 2. IP > SERIAL
+2. Control Mode
+--- Under Construction ---
 
-Compile:
+3. Test server: /server/server_ir.js
+###### `Node.js 12.x+`
 ```bash
-g++ -o gcs1 gc_s1.cpp -lPocoNet -lPocoUtil -lPocoFoundation
+node server_ir
 ```
-Program Run:
-1. get_SERIAL
-```bash
-./gcs1 <zmote-ip-addr> get_SERIAL
-```
-2. set_SERIAL
-```bash
-./gcs1 <zmote-ip-addr> set_SERIAL <baudrate> <flowcontrol> <parity>
-```
-
-Todo : https://github.com/AumBhatt/aura-zmote/issues/1#issue-941011234
