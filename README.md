@@ -17,7 +17,7 @@ Program Run:
 ```
 
 2. Control Mode
---- Under Construction ---
+` Under Construction `
 
 3. Test server: /server/server_ir.js
 ###### `Node.js 12.x+`
