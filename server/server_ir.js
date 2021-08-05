@@ -1,47 +1,49 @@
-const express = require("express");
-const app = express();
-const port = 4998; // iTach Port number
+const net = require('net');
+const { setTimeout } = require('timers');
+const PORT = 3000;
 
+let command =
+    "sendir,1:1,0,37000,1,1,166,167,20,63,20,64,19,64,19,23,19,22,20,23,19,23,19,23,19,64,19,64,19,64,19,23,19,23,19,23,19,23,19,23,19,22,20,64,19,23,19,23,19," +
+    "23,19,23,19,23,19,23,19,63,20,23,19,64,19,63,20,64,19,63,20,64,19,63,20,1729,166,167,20,64,19,64,19,64,19,23,19,23,19,23,19,23,19,23,19,64,19,64,19,64,19," + 
+    "23,19,23,19,23,19,23,19,23,21,21,19,64,19,23,19,23,19,23,19,23,19,23,19,23,19,64,19,23,19,63,20,63,20,64,19,63,20,64,19,64,19,3692\r";
 
-app.all('*', (req, res) => {
-    console.log("Request Endpoint : " + req.url);
+const server = net.createServer((socket) => {
+    console.log("New Client Connected");
 
-    let requestBody = "";
-    let responseBody;
-    req.on('data', function(chunk) {
-        requestBody += chunk;
+    socket.on('data', (buffer) => {
+        let data = '';
+        data += buffer;
+        console.log(data);
+        if(data.includes("get_IRL")) {
+            socket.write("IR Learner Enabled");
+            for(var i=1; i<=3; ++i) {
+                setTimeout(function() {
+                    console.log("> Sending command");
+                    socket.write(command);
+                }, 1000*i);
+            }
+/*             setTimeout(function() {
+                socket.end("IR Learner Disabled");
+                socket.destroy();
+            }, 20000); */
+        }
+        else if(data.includes("stop_IRL")) {
+            socket.end("IR Learner Disabled");
+        }
     });
-    req.on('end', function() {
-        console.log("Request Body     : " + requestBody);
 
-        if(requestBody.includes("sendir")){
-            res.end("completeir,1:1,0").end();
-        }
-        else if(requestBody === 'stop_IRL') {
-            res.write(`IR Learner Disabled`);
-            res.end();
-        }
-        else if(requestBody === 'get_IRL'){
-            res.write(`IR Learner Enabled`);
-            setTimeout(() => {
-                res.write(handleZmoteRequest(requestBody));
-                res.write("\sample-ir-command");
-                res.end();
-            }, 5000);
-        }
-        else {
-            res.end();
-        }
-
-        // Emulate no button pressed
-        setTimeout(() => {
-            res.end();
-        }, 20000);
-        console.log("Sending Response");
+    socket.on('close', () => {
+        console.log("Client Disconnected");
+        socket.destroy();
     });
+
+}).on('error', (err) => {
+  // Handle errors here.
+  throw err;
 });
 
-app.listen(port, () => {
+// Grab an arbitrary unused port.
+server.listen(PORT, () => {
     console.clear();
-    console.log(`zmote server: Listening @ ${port}`);
+  console.log('Server @\n', server.address());
 });
