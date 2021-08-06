@@ -26,8 +26,8 @@ def mySocket():
                 if not data:
                     break
                 print(data, type(data))
-                if(str(data) == "get_IRL\r"):
-                    conn.send(bytes(sample, 'utf-8'))
+                # if(str(data) == "get_IRL\r"):
+                conn.send(bytes(sample, 'utf-8'))
                 # print("echoing.....")
             print(" > Client Disconncted")
     mySocket()
