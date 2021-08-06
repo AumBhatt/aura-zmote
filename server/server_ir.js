@@ -16,10 +16,12 @@ const server = net.createServer((socket) => {
         console.log(data);
         if(data.includes("get_IRL")) {
             socket.write("IR Learner Enabled");
-            for(var i=1; i<=3; ++i) {
+            for(var i=1; i<=4; ++i) {
                 setTimeout(function() {
-                    console.log("> Sending command");
-                    socket.write(command);
+                    if(!socket.destroyed) {
+                        console.log("> Sending command");
+                        socket.write(command);
+                    }
                 }, 1000*i);
             }
 /*             setTimeout(function() {
