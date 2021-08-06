@@ -26,12 +26,8 @@ def mySocket():
                 if not data:
                     break
                 print(data, type(data))
-                if str(data, 'utf-8') == 'get_IRL\r':
-                    conn.send(bytes('IR Learner Enabled', 'utf-8'))
-                    print("Sending sample command")
+                if(str(data) == "get_IRL\r"):
                     conn.send(bytes(sample, 'utf-8'))
-                else:
-                    conn.send(bytes('IR Learner Disabled', 'utf-8'))
                 # print("echoing.....")
             print(" > Client Disconncted")
     mySocket()

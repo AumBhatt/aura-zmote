@@ -5,10 +5,11 @@
 
 #include <sys/socket.h>
 #include <netinet/in.h>
-
+#include <boost/algorithm/string.hpp>
+#include <boost/asio.hpp>
 #define buff_size 4096
 
-#define PORT 3000
+#define PORT 4998
 
 int main(int argc, char *argv[]) {
 
@@ -59,8 +60,9 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    int valread = read(new_socket, buffer, buff_size);
-    std::cout<<"server:\n\tbuffer : "<<buffer;
+    // int valread = read(new_socket, buffer, buff_size);
+    // const char temp;
+    // std::cout<<"server:\n\tbuffer : "<<boost::erase_all(std::string(temp), "\r");
     sleep(1);
     
     const char *sample = std::string("sendir,1:1,0,37000,1,1,166,167,20,63,20,64,19,64,19,23,19,22,20,23,19,23,19,23,19,64,19,64,19,64,19,23,19,23,19,23,19,23,19,23,19,22,20,64,19,23,19,23,19,23,19,23,19,23,19,23,19,63,20,23,19,64,19,63,20,64,19,63,20,64,19,63,20,1729,166,167,20,64,19,64,19,64,19,23,19,23,19,23,19,23,19,23,19,64,19,64,19,64,19,23,19,23,19,23,19,23,19,23,21,21,19,64,19,23,19,23,19,23,19,23,19,23,19,23,19,64,19,23,19,63,20,63,20,64,19,63,20,64,19,64,19,3692").c_str();

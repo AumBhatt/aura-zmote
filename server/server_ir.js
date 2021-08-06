@@ -25,10 +25,11 @@ const server = net.createServer((socket) => {
 /*             setTimeout(function() {
                 socket.end("IR Learner Disabled");
                 socket.destroy();
-            }, 20000); */
+            }, 5000); */
         }
         else if(data.includes("stop_IRL")) {
-            socket.end("IR Learner Disabled");
+            // socket.end("IR Learner Disabled");
+            socket.destroy();
         }
     });
 
