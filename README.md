@@ -13,7 +13,7 @@ Program Run:
 1. Learn Mode
 <br>	Note: Doesn't Store Commands
 ```bash
-./i1 <gc-ip-addr>
+./iX <IRX-ip-addr> <IRX-port>
 ```
 
 2. Control Mode
