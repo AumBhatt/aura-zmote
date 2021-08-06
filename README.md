@@ -16,9 +16,6 @@ Program Run:
 ./iX <IRX-ip-addr> <IRX-port>
 ```
 
-2. Control Mode
-` Under Construction `
-
 3. Test server: /server/server_ir.js
 ###### `Node.js 12.x+`
 ```bash
