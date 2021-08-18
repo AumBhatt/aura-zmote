@@ -1,4 +1,5 @@
 # <p align="center"><img src="zmote-logo3.png"></p>
+###### <p align="right">[Click for Docs](https://github.com/AumBhatt/aura-zmote/raw/main/API-iTach.pdf)</p>
 ## 1. IP > IR
 Compile: test/i1.cpp
 ```bash
